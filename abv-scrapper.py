@@ -12,7 +12,7 @@ import time
 import logging
 
 
-class ABVScrapper:
+class ABVAttachmentDownloader:
     def __init__(
         self, webdriver_path: str = r"C:\chromedriver.exe", log_level: str = "INFO"
     ) -> None:
@@ -109,8 +109,8 @@ class ABVScrapper:
             except StaleElementReferenceException as e:
                 self.logger.error(e)
 
-    def scrape(self):
-        """Scrapes(downloads) attachments from the ABV.bg mailbox."""
+    def download(self):
+        """Downloads attachments from the ABV.bg mailbox."""
         credentials = self._get_credentials()
         service = Service(executable_path=self.webdriver_path)
 
@@ -123,5 +123,5 @@ class ABVScrapper:
 
 
 if __name__ == "__main__":
-    scrapper = ABVScrapper()
-    scrapper.scrape()
+    scrapper = ABVAttachmentDownloader()
+    scrapper.download()
