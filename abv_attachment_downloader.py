@@ -17,12 +17,19 @@ class ABVAttachmentDownloader:
         self,
         webdriver_path: str = r"C:\chromedriver.exe",
         folder_name: str = "UBB",
+        skip_file_extensions: Tuple[str] = (".p7s",),
         log_level: str = "INFO",
     ) -> None:
-        """Downloads the attachments from a given folder."""
+        """
+        Downloads the attachments from a given folder.
+        webdriver_path[str]: The path of your webdriver
+        folder_name[str]: The folder that you want to check for attachments
+        skip_file_extensions[Tuple[str]]: Tuple of extensions that you do not want to download - ('.p7s',)
+        """
         self.webdriver_path = webdriver_path
         self.url = "https://abv.bg"
         self.folder_name = folder_name
+        self.skip_file_extensions = skip_file_extensions
         self.load_timeout = 2
         self.logger = self._get_logger(log_level=log_level)
 
@@ -104,6 +111,15 @@ class ABVAttachmentDownloader:
 
         return True
 
+    def _skip_file(self, file_text: str) -> Optional[bool]:
+        """Checks if a file should be skipped.
+        file_text[str]: The file name that you want to check
+        returns: True if the file should be skipped."""
+        for skipped_ext in self.skip_file_extensions:
+            if skipped_ext.lower() in file_text.lower():
+                logging.debug(f"Skipped {skipped_ext} file.")
+                return True
+
     def _download_attachment(self, browser: Chrome) -> None:
         """Downloads attachments from an email."""
         download_links = browser.find_elements(
@@ -112,8 +128,7 @@ class ABVAttachmentDownloader:
         for link in download_links:
             parent_div: WebElement = link.get_property("parentNode")
             file_text: str = parent_div.get_property("children")[0].text
-            if ".p7s" in file_text.lower():
-                logging.debug("Skipped .p7s file.")
+            if self._skip_file(file_text=file_text):
                 continue
             link.click()
             file_text = file_text.replace("\n", " ")
@@ -131,7 +146,8 @@ class ABVAttachmentDownloader:
                 self.logger.error(e)
 
     def download(self):
-        """Downloads attachments from the ABV.bg mailbox."""
+        """Downloads attachments from the ABV.bg mailbox.
+        Puts a flag on each checked email."""
         credentials = self._get_credentials()
         service = Service(executable_path=self.webdriver_path)
 
