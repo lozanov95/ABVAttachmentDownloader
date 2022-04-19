@@ -14,11 +14,15 @@ import logging
 
 class ABVAttachmentDownloader:
     def __init__(
-        self, webdriver_path: str = r"C:\chromedriver.exe", log_level: str = "INFO"
+        self,
+        webdriver_path: str = r"C:\chromedriver.exe",
+        folder_name: str = "UBB",
+        log_level: str = "INFO",
     ) -> None:
+        """Downloads the attachments from a given folder."""
         self.webdriver_path = webdriver_path
         self.url = "https://abv.bg"
-        self.folder_name = "UBB"
+        self.folder_name = folder_name
         self.load_timeout = 2
         self.logger = self._get_logger(log_level=log_level)
 
