@@ -55,6 +55,19 @@ class ABVAttachmentDownloader:
             if folder_name in folder.text:
                 return folder.click()
 
+    def _get_row_number(self, flag: WebElement) -> str:
+        """Returns the number of the flag's row."""
+        attributes = (
+            flag.get_property("parentElement")
+            .get_property("parentElement")
+            .get_property("parentElement")
+            .get_property("attributes")
+        )
+
+        for attribute in attributes:
+            if attribute.get("name") == "__gwt_row":
+                return attribute.get("nodeValue")
+
     def _select_email(self, browser: Chrome) -> bool:
         """Finds non-flagged email and opens it."""
         time.sleep(self.load_timeout)
@@ -65,21 +78,11 @@ class ABVAttachmentDownloader:
             self.logger.info("No more unflagged emails found.")
             return False
 
-        attributes = (
-            flag.get_property("parentElement")
-            .get_property("parentElement")
-            .get_property("parentElement")
-            .get_property("attributes")
-        )
-
+        row_number = self._get_row_number(flag)
         flag.click()
-        gwt_value = ""
-        for attribute in attributes:
-            if attribute.get("name") == "__gwt_row":
-                gwt_value = attribute.get("nodeValue")
 
         browser.find_element(
-            by=By.CSS_SELECTOR, value=f'[__gwt_row="{gwt_value}"][class*="GG"]'
+            by=By.CSS_SELECTOR, value=f'[__gwt_row="{row_number}"][class*="GG"]'
         ).find_element(by=By.CSS_SELECTOR, value=".inbox-cellTableSecondColumn").click()
 
         return True
@@ -92,10 +95,11 @@ class ABVAttachmentDownloader:
         for link in download_links:
             parent_div: WebElement = link.get_property("parentNode")
             file_text: str = parent_div.get_property("children")[0].text
-            if "p7s" in file_text.lower():
+            if ".p7s" in file_text.lower():
                 logging.debug("Skipped .p7s file.")
                 continue
             link.click()
+            file_text = file_text.replace("\n", " ")
             self.logger.info(f"Downloaded file {file_text}.")
 
     def download_attachments(self, browser: Chrome):
