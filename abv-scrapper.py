@@ -26,7 +26,7 @@ class ABVAttachmentDownloader:
         self.load_timeout = 2
         self.logger = self._get_logger(log_level=log_level)
 
-    def _get_logger(self, log_level: str):
+    def _get_logger(self, log_level: str) -> logging.Logger:
         """Configures and returns a logger instance."""
         FORMAT = "%(asctime)s %(module)s [%(levelname)s]: %(message)s"
         logging.basicConfig(level=log_level.upper(), format=FORMAT)
@@ -44,13 +44,20 @@ class ABVAttachmentDownloader:
         browser.execute_script("document.querySelector('#abv-GDPR-frame').remove()")
         self.logger.info("Closed GDPR consent modal.")
 
-    def _sign_in(self, browser: Chrome, credentials: Tuple[str, str]):
+    def _sign_in(self, browser: Chrome, credentials: Tuple[str, str]) -> bool:
         """Signs in with the given credentials."""
         username, password = credentials
         browser.find_element(by=By.ID, value="username").send_keys(username)
         browser.find_element(by=By.ID, value="password").send_keys(password)
         browser.find_element(by=By.ID, value="loginBut").submit()
+
+        if len(browser.find_elements(by=By.ID, value="username")) > 0:
+            exception_msg = "Sign in failed!"
+            logging.error(exception_msg)
+            return False
+
         self.logger.info(f"Signed in with account {username}.")
+        return True
 
     def _open_folder(self, browser: Chrome, folder_name: str) -> None:
         """Opens a given folder."""
@@ -132,7 +139,8 @@ class ABVAttachmentDownloader:
             browser.implicitly_wait(10)
             browser.get(self.url)
             self._consent_cookies(browser=browser)
-            self._sign_in(browser=browser, credentials=credentials)
+            if not self._sign_in(browser=browser, credentials=credentials):
+                return
             self._download_attachments(browser=browser)
 
 
