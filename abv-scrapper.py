@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Optional, Tuple
 from selenium.webdriver.common.by import By
 from selenium.webdriver import Chrome
 from selenium.webdriver.remote.webelement import WebElement
@@ -59,6 +59,14 @@ class ABVAttachmentDownloader:
             if folder_name in folder.text:
                 return folder.click()
 
+    def _find_flag(self, browser) -> Optional[WebElement]:
+        """Finds an unclicked flag and returns it as an instance."""
+        try:
+            return browser.find_element(by=By.CSS_SELECTOR, value=".icon-flag-off")
+        except NoSuchElementException as e:
+            self.logger.info("No more unflagged emails found.")
+            return None
+
     def _get_row_number(self, flag: WebElement) -> str:
         """Returns the number of the flag's row."""
         attributes = (
@@ -75,11 +83,9 @@ class ABVAttachmentDownloader:
     def _select_email(self, browser: Chrome) -> bool:
         """Finds non-flagged email and opens it."""
         time.sleep(self.load_timeout)
-        try:
-            flag = browser.find_element(by=By.CSS_SELECTOR, value=".icon-flag-off")
+        flag = self._find_flag(browser=browser)
 
-        except NoSuchElementException as e:
-            self.logger.info("No more unflagged emails found.")
+        if not flag:
             return False
 
         row_number = self._get_row_number(flag)
