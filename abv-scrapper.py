@@ -112,7 +112,7 @@ class ABVAttachmentDownloader:
             file_text = file_text.replace("\n", " ")
             self.logger.info(f"Downloaded file {file_text}.")
 
-    def download_attachments(self, browser: Chrome):
+    def _download_attachments(self, browser: Chrome):
         """Downloads attachments."""
         while True:
             try:
@@ -133,7 +133,7 @@ class ABVAttachmentDownloader:
             browser.get(self.url)
             self._consent_cookies(browser=browser)
             self._sign_in(browser=browser, credentials=credentials)
-            self.download_attachments(browser=browser)
+            self._download_attachments(browser=browser)
 
 
 if __name__ == "__main__":
