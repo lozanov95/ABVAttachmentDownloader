@@ -20,12 +20,12 @@ class ABVScrapper:
         self.url = "https://abv.bg"
         self.folder_name = "UBB"
         self.load_timeout = 2
-        self.logger = self._get_logger(log_level=log_level.upper())
+        self.logger = self._get_logger(log_level=log_level)
 
     def _get_logger(self, log_level: str):
         """Configures and returns a logger instance."""
         FORMAT = "%(asctime)s %(module)s [%(levelname)s]: %(message)s"
-        logging.basicConfig(level=log_level, format=FORMAT)
+        logging.basicConfig(level=log_level.upper(), format=FORMAT)
         return logging.getLogger(__name__)
 
     def _get_credentials(self) -> Tuple[str, str]:
@@ -93,6 +93,7 @@ class ABVScrapper:
             parent_div: WebElement = link.get_property("parentNode")
             file_text: str = parent_div.get_property("children")[0].text
             if "p7s" in file_text.lower():
+                logging.debug("Skipped .p7s file.")
                 continue
             link.click()
             self.logger.info(f"Downloaded file {file_text}.")
