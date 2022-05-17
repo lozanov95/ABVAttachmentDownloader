@@ -6,7 +6,9 @@ from selenium.webdriver.chrome.service import Service
 from selenium.common.exceptions import (
     NoSuchElementException,
     StaleElementReferenceException,
+    SessionNotCreatedException,
 )
+import webbrowser
 from getpass import getpass
 import time
 import logging
@@ -32,6 +34,7 @@ class ABVAttachmentDownloader:
         self.skip_file_extensions = skip_file_extensions
         self.load_timeout = 2
         self.logger = self._get_logger(log_level=log_level)
+        self.webdriver_download_path = "https://chromedriver.chromium.org/downloads"
 
     def _get_logger(self, log_level: str) -> logging.Logger:
         """Configures and returns a logger instance."""
@@ -150,14 +153,18 @@ class ABVAttachmentDownloader:
         Puts a flag on each checked email."""
         credentials = self._get_credentials()
         service = Service(executable_path=self.webdriver_path)
-
-        with Chrome(service=service) as browser:
-            browser.implicitly_wait(10)
-            browser.get(self.url)
-            self._consent_cookies(browser=browser)
-            if not self._sign_in(browser=browser, credentials=credentials):
-                return
-            self._download_attachments(browser=browser)
+        try:
+            with Chrome(service=service) as browser:
+                browser.implicitly_wait(10)
+                browser.get(self.url)
+                self._consent_cookies(browser=browser)
+                if not self._sign_in(browser=browser, credentials=credentials):
+                    return
+                self._download_attachments(browser=browser)
+        except SessionNotCreatedException as e:
+            self.logger.error(e.msg)
+            self.logger.info("Opened the download link via the default browser.")
+            webbrowser.open(self.webdriver_download_path, new=2)
 
 
 if __name__ == "__main__":
