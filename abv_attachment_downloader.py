@@ -7,6 +7,7 @@ from selenium.common.exceptions import (
     NoSuchElementException,
     StaleElementReferenceException,
     SessionNotCreatedException,
+    WebDriverException,
 )
 import webbrowser
 from getpass import getpass
@@ -161,7 +162,7 @@ class ABVAttachmentDownloader:
                 if not self._sign_in(browser=browser, credentials=credentials):
                     return
                 self._download_attachments(browser=browser)
-        except SessionNotCreatedException as e:
+        except (SessionNotCreatedException, WebDriverException) as e:
             self.logger.error(e.msg)
             self.logger.info("Opened the download link via the default browser.")
             webbrowser.open(self.webdriver_download_path, new=2)
