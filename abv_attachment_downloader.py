@@ -140,11 +140,20 @@ class ABVAttachmentDownloader:
 
     def _download_attachments(self, browser: Chrome):
         """Downloads attachments."""
+        self._open_folder(browser=browser, folder_name=self.folder_name)
+        folder_url, page = browser.current_url.rsplit("/", 1)
+        page = int(page)
+        opened_mail = False
         while True:
             try:
-                self._open_folder(browser=browser, folder_name=self.folder_name)
+                browser.get(f"{folder_url}/{page}")
                 if not self._select_email(browser=browser):
-                    return
+                    if not opened_mail:
+                        return
+                    opened_mail = False
+                    page += 1
+                    continue
+                opened_mail = True
                 self._download_attachment(browser=browser)
             except StaleElementReferenceException as e:
                 self.logger.error(e)
