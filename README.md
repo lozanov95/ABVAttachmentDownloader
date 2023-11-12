@@ -1,16 +1,47 @@
 # ABV Attachment Downloader
 
 ## Setup
-- Install the dependencies from *requirements.txt* - ***pip install -r requirements.txt***
-- Download Chrome and its webdriver for your Chrome version - ***https://chromedriver.chromium.org/downloads***
-- Make sure that Chrome is downloading files, without confirmation prompt.
 
-## Running the script
-- Instantiate the ABVAttachmentDownloader class and specify your webdriver path and the name of the folder.
-- Call the *download()* method to activate the script.
+Create a .env file in this directory
+Enter the following variables
+
+```sh
+USERNAME=abvusername
+PASSWORD=abvpassword
+ZIPPWD=zippassword
 ```
-if __name__ == "__main__":
-    attachment_downloader = ABVAttachmentDownloader()
-    attachment_downloader.download()
+
+## Using the script
+
+### Using Makefile
+
+Run the following command to build the image:
+
+```sh
+make image
 ```
-- You will be asked to supply username and password. Then it will sign in and look for any attachments in the folder that you specified folder.
+
+Then run the download functionality:
+
+```sh
+make download
+```
+
+### Without Makefile
+
+Run the following cmd to build the image:
+
+```sh
+docker image build . -t abvdownloader
+```
+
+Then clear any existing containers with that name and start the new one:
+
+```sh
+docker container rm -f c-abvdownloader
+docker container run -v $(downloads_path):/downloads --env-file .env --name c-abvdownloader abvdownloader
+```
+
+## Output
+
+The downloaded files should be in your _C:\Users\youraccount\Documents\izvlecheniya_

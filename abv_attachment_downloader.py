@@ -1,6 +1,7 @@
 from typing import Optional, Tuple
 from selenium.webdriver.common.by import By
 from selenium.webdriver import Chrome
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.chrome.service import Service
 from selenium.common.exceptions import (
@@ -13,12 +14,13 @@ import webbrowser
 from getpass import getpass
 import time
 import logging
+import os
 
 
 class ABVAttachmentDownloader:
     def __init__(
         self,
-        webdriver_path: str = r"C:\chromedriver.exe",
+        webdriver_path: str = None,
         folder_name: str = "UBB",
         skip_file_extensions: Tuple[str] = (".p7s",),
         log_level: str = "INFO",
@@ -45,8 +47,8 @@ class ABVAttachmentDownloader:
 
     def _get_credentials(self) -> Tuple[str, str]:
         """Gets the credentials from a user. Returns tuple(username, password)."""
-        username = input("Username: ")
-        password = getpass("Password: ")
+        username = os.getenv("USERNAME") or input("Username: ")
+        password = os.getenv("PASSWORD") or getpass("Password: ")
 
         return username, password
 
@@ -163,8 +165,12 @@ class ABVAttachmentDownloader:
         Puts a flag on each checked email."""
         credentials = self._get_credentials()
         service = Service(executable_path=self.webdriver_path)
+        options = Options()
+        options.add_argument("--headless")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
         try:
-            with Chrome(service=service) as browser:
+            with Chrome(service=service, options=options) as browser:
                 browser.implicitly_wait(10)
                 browser.get(self.url)
                 self._consent_cookies(browser=browser)
