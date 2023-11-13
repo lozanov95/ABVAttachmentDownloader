@@ -1,13 +1,15 @@
 downloads_path := $(HOMEDRIVE)$(HOMEPATH)\Downloads\izvlecheniya
+image_name := abvdownloader
+container_name := c-abvdownloader
 
 image:
-	docker image build . -t abvdownloader
+	docker image build . -t $(image_name)
 
 run-container:
 	make image
-	docker container rm -f c-abvdownloader
-	docker container run -it --name c-abvdownloader abvdownloader
+	docker container rm -f $(container_name)
+	docker container run -d -it -v $(downloads_path):/downloads --env-file .env --name $(container_name) $(image_name)
 
 download:
-	docker container rm -f c-abvdownloader
-	docker container run -v $(downloads_path):/downloads --env-file .env --name c-abvdownloader abvdownloader
+	docker container start $(container_name)
+	docker exec -it $(container_name) bash -c /app/download.sh

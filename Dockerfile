@@ -10,7 +10,7 @@ RUN unzip chrome-linux64.zip
 
 FROM base
 # Installing chrome specific packages
-RUN apt install -y libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon-x11-0 libxcomposite-dev libxdamage-dev libxrandr2 libgbm-dev libasound2
+RUN apt install -y libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon-x11-0 libxcomposite-dev libxdamage-dev libxrandr2 libgbm-dev libasound2 zip
 
 # Copying binaries
 COPY --from=driver /chromedriver-linux64/chromedriver /usr/local/bin/
@@ -20,6 +20,7 @@ COPY --from=driver /chrome-linux64 /usr/local/bin/
 WORKDIR /app
 COPY requirements.txt ./
 RUN pip install -r requirements.txt
-COPY abv_attachment_downloader.py ./
+COPY abv_attachment_downloader.py download.sh ./
 VOLUME [ "/downloads"]
-ENTRYPOINT python3 /app/abv_attachment_downloader.py && unzip -P $ZIPPWD "*.zip" && mv *.pdf /downloads
+WORKDIR /tmp/zips
+CMD /bin/bash
