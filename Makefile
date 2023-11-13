@@ -13,3 +13,4 @@ run-container:
 download:
 	docker container start $(container_name)
 	docker exec -it $(container_name) bash -c /app/download.sh
+	docker container stop $(container_name)
