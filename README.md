@@ -15,10 +15,10 @@ ZIPPWD=zippassword
 
 ### Using Makefile
 
-Run the following command to build the image:
+Run the following command to build the image and start the container:
 
 ```sh
-make image
+make run-container
 ```
 
 Then run the download functionality:
@@ -40,6 +40,7 @@ Then clear any existing containers with that name and start the new one:
 ```sh
 docker container rm -f c-abvdownloader
 docker container run -v $(downloads_path):/downloads --env-file .env --name c-abvdownloader abvdownloader
+docker exec -it $(container_name) bash -c /app/download.sh
 ```
 
 ## Output
