@@ -5,7 +5,7 @@ rm -f /downloads/*
 
 # Run the download
 echo "* Starting the attachment download."
-python3 /app/main.py
+python3 /app/main.py 
 
 # Unzip and move the files
 echo "* Extracting the files and zipping them into single archive."
