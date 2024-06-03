@@ -54,8 +54,14 @@ class ABVAttachmentDownloader:
 
     def _consent_cookies(self, browser: Chrome) -> None:
         """Closes the consent modal."""
-        browser.execute_script("document.querySelector('#abv-GDPR-frame').remove()")
+        # Switching to the iframe
+        frame = browser.find_element(by=By.ID, value="abv-GDPR-frame")
+        browser.switch_to.frame(frame)
+        browser.find_element(by=By.CLASS_NAME, value="didomi-button-highlight").click()
         self.logger.info("Closed GDPR consent modal.")
+
+        # Switching back to the parent frame
+        browser.switch_to.parent_frame()
 
     def _sign_in(self, browser: Chrome, credentials: Tuple[str, str]) -> bool:
         """Signs in with the given credentials."""
