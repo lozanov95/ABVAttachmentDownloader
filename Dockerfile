@@ -1,12 +1,15 @@
-FROM python:3.11.6 as base
+FROM python:3.11.9 as base
 RUN apt update && apt upgrade -y
 
 # Downloading the chrome binaries
-FROM base as driver
-RUN wget https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/119.0.6045.105/linux64/chrome-linux64.zip
-RUN wget https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/119.0.6045.105/linux64/chromedriver-linux64.zip
-RUN unzip chromedriver-linux64.zip 
+# Chrome for testing releases https://googlechromelabs.github.io/chrome-for-testing/
+FROM base as browser
+RUN wget https://storage.googleapis.com/chrome-for-testing-public/125.0.6422.141/linux64/chrome-linux64.zip
 RUN unzip chrome-linux64.zip
+
+FROM base as driver
+RUN wget https://storage.googleapis.com/chrome-for-testing-public/125.0.6422.141/linux64/chromedriver-linux64.zip
+RUN unzip chromedriver-linux64.zip 
 
 # Downloading the Python dependencies
 FROM base as deps
@@ -21,7 +24,7 @@ RUN apt install -y libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxk
 
 # Copying dependencies
 COPY --from=driver /chromedriver-linux64/chromedriver /usr/local/bin/
-COPY --from=driver /chrome-linux64 /usr/local/bin/
+COPY --from=browser /chrome-linux64 /usr/local/bin/
 COPY --from=deps /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
