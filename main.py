@@ -179,6 +179,7 @@ class ABVAttachmentDownloader:
             with Chrome(service=service, options=options) as browser:
                 browser.implicitly_wait(10)
                 browser.get(self.url)
+                time.sleep(10)
                 self._consent_cookies(browser=browser)
                 if not self._sign_in(browser=browser, credentials=credentials):
                     return
