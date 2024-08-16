@@ -1,18 +1,18 @@
-FROM python:3.11.9 as base
+FROM python:3.11.9 AS base
 RUN apt update && apt upgrade -y
 
 # Downloading the chrome binaries
 # Chrome for testing releases https://googlechromelabs.github.io/chrome-for-testing/
-FROM base as browser
+FROM base AS browser
 RUN wget https://storage.googleapis.com/chrome-for-testing-public/125.0.6422.141/linux64/chrome-linux64.zip
 RUN unzip chrome-linux64.zip
 
-FROM base as driver
+FROM base AS driver
 RUN wget https://storage.googleapis.com/chrome-for-testing-public/125.0.6422.141/linux64/chromedriver-linux64.zip
 RUN unzip chromedriver-linux64.zip 
 
 # Downloading the Python dependencies
-FROM base as deps
+FROM base AS deps
 RUN python3 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 COPY requirements.txt ./
@@ -32,4 +32,4 @@ WORKDIR /app
 COPY main.py download.sh ./
 VOLUME [ "/downloads"]
 WORKDIR /tmp/zips
-CMD /bin/bash
+CMD ["/bin/bash"]
