@@ -177,6 +177,7 @@ class ABVAttachmentDownloader:
                 self._consent_cookies(browser=browser)
                 if not self._sign_in(browser=browser, credentials=credentials):
                     return
+                browser.find_element(by=By.ID, value="loginBut").click()
                 self._download_attachments(browser=browser)
         except (SessionNotCreatedException, WebDriverException) as e:
             self.logger.error(e.msg)
